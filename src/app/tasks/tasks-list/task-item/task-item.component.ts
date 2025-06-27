@@ -1,4 +1,4 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, viewChild, ElementRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { Task, TaskStatus } from '../../task.model';
@@ -13,6 +13,10 @@ import { TasksService } from '../../../tasks.service';
 })
 export class TaskItemComponent {
   task = input.required<Task>();
+  isEditModalOpen:boolean = false;
+
+  editTitle = '';
+  editDescription = '';
 
   private taskService = inject(TasksService);
 
@@ -28,6 +32,12 @@ export class TaskItemComponent {
         return 'Open';
     }
   });
+
+  onEdit() {
+    this.isEditModalOpen = !this.isEditModalOpen;
+    this.editTitle = this.task().title;
+    this.editDescription = this.task().description;
+  }
 
   onChangeTaskStatus(taskId: string, status: string) {
     let newStatus: TaskStatus = 'OPEN';
@@ -46,5 +56,14 @@ export class TaskItemComponent {
         break;
     }
     this.taskService.updateTaskStatus(taskId, newStatus)
+  }
+
+  onDeleteTask(taskId: string) {
+    this.taskService.deleteTask(taskId);
+  }
+
+  onAddTask() {
+    this.taskService.updateTaskItem(this.task().id, this.editTitle, this.editDescription);
+    this.onEdit();
   }
 }

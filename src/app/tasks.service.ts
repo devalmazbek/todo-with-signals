@@ -27,6 +27,17 @@ export class TasksService {
     }))
   }
 
+  deleteTask(id: string) {
+    this.tasks.update((oldTask) => oldTask.filter((task) => task.id !== id));
+    console.log(this.tasks);
+  }
+
+  updateTaskItem(id: string, title:string, description: string) {
+    console.log(id, title, description);
+    this.tasks.update((oldTask) => oldTask.map((task) => task.id === id ? {...task, title: title, description: description} : task ))
+    console.log(this.tasks());
+  }
+
 
 
 
