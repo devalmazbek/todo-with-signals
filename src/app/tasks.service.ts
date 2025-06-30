@@ -1,13 +1,29 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, effect } from '@angular/core';
 import { Task, TaskStatus } from './tasks/task.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TasksService {
-  private tasks = signal<Task[]>([]);
+  private tasks = signal<Task[]>(this.loadFromStorage());
 
   allTasks = this.tasks.asReadonly();
+
+  constructor() {
+    effect(() => {
+      const tasks = this.tasks();
+      localStorage.setItem('task', JSON.stringify(tasks));
+    });
+  }
+
+  private loadFromStorage(): Task[] {
+    const raw = localStorage.getItem('task');
+    try {
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
 
   addTask(taskData: {title: string; description: string}) {
     const newTask: Task = {
@@ -29,13 +45,10 @@ export class TasksService {
 
   deleteTask(id: string) {
     this.tasks.update((oldTask) => oldTask.filter((task) => task.id !== id));
-    console.log(this.tasks);
   }
 
   updateTaskItem(id: string, title:string, description: string) {
-    console.log(id, title, description);
     this.tasks.update((oldTask) => oldTask.map((task) => task.id === id ? {...task, title: title, description: description} : task ))
-    console.log(this.tasks());
   }
 
 
